@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creating Management Event Trail
+
+Parameters: 
+  ManagementEventTrailBucketName:
+    Type: String
+
+Resources: 
+
+  ManagementEventTrailBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref ManagementEventTrailBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: AES256
+      # trailのロックはかけたほうがいい
+      # ObjectLockConfiguration:
+      #   ObjectLockConfiguration
+      # ObjectLockEnabled: Boolean
+  
+  # loggroup
+  # KMS
+  # rogrole
+
+  # ManagementEventTrail:
+  #   Type: AWS::CloudTrail::Trail
+  #   Properties:
+  #     TrailName: ManagementEventTrail
+  #     IsMultiRegionTrail: true 
+  #     IncludeGlobalServiceEvents: true
+  #     S3BucketName: !Ref ManagementEventTrailBucket
+  #     EnableLogFileValidation: true
+  #     KMSKeyId: 
+  #     CloudWatchLogsLogGroupArn: 
+  #     CloudWatchLogsRoleArn: 
+  #     EventSelectors: 
+  #       - ReadWriteType: All
+  #         IncludeManagementEvents: true
+  #     IsLogging: true
+

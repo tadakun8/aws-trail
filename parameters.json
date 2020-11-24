@@ -1,0 +1,8 @@
+{
+  "Parameters" : {
+    "ManagementEventTrailBucketName": "sample-management-event-trail"
+  },
+  "Tags" : {
+    "Purpose" : "management-event-trail"
+  }
+}
