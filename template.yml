@@ -4,7 +4,8 @@ Description: Creating Management Event Trail
 Parameters: 
   ManagementEventTrailBucketName:
     Type: String
-
+  TrailLogGroupName:
+    Type: String
 Resources: 
 
   ManagementEventTrailBucket:
@@ -21,6 +22,14 @@ Resources:
       # ObjectLockEnabled: Boolean
   
   # loggroup
+  TrailLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties: 
+      LogGroupName: !Ref TrailLogGroupName
+      # ログデータの暗号化をする
+      #KmsKeyId: String
+      RetentionInDays: 365
+  
   # KMS
   # rogrole
 

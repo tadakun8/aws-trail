@@ -1,8 +1,6 @@
 {
   "Parameters" : {
-    "ManagementEventTrailBucketName": "sample-management-event-trail"
-  },
-  "Tags" : {
-    "Purpose" : "management-event-trail"
+    "ManagementEventTrailBucketName": "sample-management-event-trail",
+    "TrailLogGroupName": "CloudTrail/management_event_log"
   }
 }
