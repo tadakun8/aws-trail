@@ -6,8 +6,11 @@ Parameters:
     Type: String
   TrailLogGroupName:
     Type: String
-  TrailLogStreamName:
+  # TrailLogStreamName:
+  #   Type: String
+  TrailName:
     Type: String
+
 Resources: 
 
   ManagementEventTrailBucket:
@@ -23,7 +26,34 @@ Resources:
       #   ObjectLockConfiguration
       # ObjectLockEnabled: Boolean
   
-  # loggroup
+  TrailBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref ManagementEventTrailBucketName
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: Allow CloudTrail to check bucket acl
+          Effect: Allow
+          Principal:
+            Service: cloudtrail.amazonaws.com
+          Action: s3:GetBucketAcl
+          Resource: !Sub 
+            - "arn:aws:s3:::${TrailBucketName}"
+            - TrailBucketName: !Ref ManagementEventTrailBucketName
+        - Sid: Allow CloudTrail to put object
+          Effect: Allow
+          Principal:
+            Service: cloudtrail.amazonaws.com
+          Action: s3:PutObject
+          Resource: !Sub 
+            - "arn:aws:s3:::${TrailBucketName}/AWSLogs/${AWS::AccountId}/*"
+            - TrailBucketName: !Ref ManagementEventTrailBucketName
+          Condition:
+            StringEquals:
+              s3:x-amz-acl: bucket-owner-full-control
+  
+
   TrailLogGroup:
     Type: "AWS::Logs::LogGroup"
     Properties: 
@@ -32,8 +62,6 @@ Resources:
       #KmsKeyId: String
       RetentionInDays: 365
   
-  # KMS
-  # rogrole
   TrailServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -54,25 +82,21 @@ Resources:
                 Action: 
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub
-                  - arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${TrailLogGroupName}:log-stream:${TrailLogStreamName}*
-                  - TrailLogGroupName: !Ref TrailLogGroupName
-                    TrailLogStreamName: !Ref TrailLogStreamName
+                Resource: !GetAtt TrailLogGroup.Arn
 
 
-  # ManagementEventTrail:
-  #   Type: AWS::CloudTrail::Trail
-  #   Properties:
-  #     TrailName: ManagementEventTrail
-  #     IsMultiRegionTrail: true 
-  #     IncludeGlobalServiceEvents: true
-  #     S3BucketName: !Ref ManagementEventTrailBucket
-  #     EnableLogFileValidation: true
-  #     KMSKeyId: 
-  #     CloudWatchLogsLogGroupArn: 
-  #     CloudWatchLogsRoleArn: 
-  #     EventSelectors: 
-  #       - ReadWriteType: All
-  #         IncludeManagementEvents: true
-  #     IsLogging: true
+  Trail:
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      TrailName: !Ref TrailName
+      IsMultiRegionTrail: true 
+      IncludeGlobalServiceEvents: true
+      S3BucketName: !Ref ManagementEventTrailBucketName
+      EnableLogFileValidation: true
+      CloudWatchLogsLogGroupArn: !GetAtt TrailLogGroup.Arn
+      CloudWatchLogsRoleArn: !GetAtt TrailServiceRole.Arn
+      EventSelectors: 
+        - ReadWriteType: All
+          IncludeManagementEvents: true
+      IsLogging: true
 
